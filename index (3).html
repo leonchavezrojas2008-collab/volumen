@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cálculo de Volumen de Caja</title>
+<style>
+    body { font-family: Arial; margin: 30px; }
+    input { padding: 5px; margin: 5px; width: 120px; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #666; padding: 8px; text-align: center; }
+    th { background: #eee; }
+    pre { background: #f4f4f4; padding: 10px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<h2>Cálculo del Volumen </h2>
+
+<label>Ancho: </label>
+<input type="number" id="anc" min="0" step="0.1" value=""><br>
+
+<label>Largo: </label>
+<input type="number" id="largo" min="0" step="0.1" value=""><br>
+
+<button onclick="calcular()">Calcular</button>
+
+<h3>Resultados</h3>
+<p id="resultados"></p>
+<p id="resultadosFinales"></p>
+<p id="procedimiento"></p>
+<div id="tabla"></div>
+
+<script>
+function calcular() {
+    const ancho = parseFloat(document.getElementById("anc").value);
+    const largo = parseFloat(document.getElementById("largo").value);
+
+    if (isNaN(ancho) || isNaN(largo) || ancho <= 2 || largo <= 2) {
+        alert("Ingresa valores válidos (mayores que 2).");
+        return;
+    }
+
+    const areaInicial = ancho * largo;
+
+    let maxVol = 0;
+    let xMax = 0;
+    let volPrev = -1;
+    let xBaja = 0;
+
+    let tablaHTML = `<table>
+        <tr><th>x (entero)</th><th>Volumen (cm³)</th></tr>
+    `;
+
+    let procedimientoTexto = ""; // Guardaremos las operaciones
+
+    const xLimite = Math.floor(Math.min(ancho, largo) / 2);
+
+    for (let x = 1; x <= xLimite; x++) {
+        let anchoRest = ancho - 2*x;
+        let largoRest = largo - 2*x;
+        let volumen = x * anchoRest * largoRest;
+
+        if (volumen < 0) break;
+
+        tablaHTML += `<tr><td>${x}</td><td>${volumen.toFixed(2)}</td></tr>`;
+
+        // Guardamos la operación en texto
+        procedimientoTexto += `x = ${x}: V = ${x} × (${ancho} - 2×${x}) × (${largo} - 2×${x}) = ${x} × ${anchoRest.toFixed(2)} × ${largoRest.toFixed(2)} ≈ ${volumen.toFixed(2)} cm³\n`;
+
+        if (volumen > maxVol) {
+            maxVol = volumen;
+            xMax = x;
+        }
+
+        if (volPrev > 0 && volumen < volPrev) {
+            xBaja = x; // Guardamos x donde empieza a disminuir
+            break;    // Paramos la tabla
+        }
+
+        volPrev = volumen;
+    }
+
+    tablaHTML += "</table>";
+    document.getElementById("tabla").innerHTML = tablaHTML;
+
+    // RESULTADOS INICIALES
+    document.getElementById("resultados").innerHTML = `
+        <b>Resultados iniciales:</b><br>
+        Área inicial = ${areaInicial.toFixed(2)} cm²<br>
+        Volumen inicial = 0 cm³ (caja plana)<br>
+        Volumen máximo ≈ ${maxVol.toFixed(2)} cm³<br>
+    `;
+
+    // CALCULAMOS RESULTADOS FINALES USANDO xBaja
+    const anchoFinal = ancho - 2 * xBaja;
+    const largoFinal = largo - 2 * xBaja;
+    const areaFinal = anchoFinal * largoFinal;
+    const volumenFinal = xBaja * anchoFinal * largoFinal;
+
+    document.getElementById("resultadosFinales").innerHTML = `
+        <b>Resultados finales:</b><br>
+        Usamos x = ${xBaja} <br>
+        Ancho restante = ${anchoFinal.toFixed(2)}<br>
+        Largo restante = ${largoFinal.toFixed(2)}<br>
+        Área de la base = ${areaFinal.toFixed(2)} cm²<br>
+        Volumen final ≈ ${volumenFinal.toFixed(2)} cm³
+    `;
+
+    
+}
+</script>
+
+</body>
+</html>
